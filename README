@@ -1,0 +1,32 @@
+=================
+   R e a d m e
+=================
+    
+Title:        SearchCircle (Demo-Application)
+Version:      1.9 (alpha)
+
+Description:  The Demo application for the "SearchCircle" GUI-Component (Swing)
+              The actual SearchCircle is located under the package "javax.swing.searchcircle"
+website:      --
+
+Copyright (C) 2011 Daus / Bellmann
+
+
+License:
+
+    CreativeCommons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)
+
+    For more Informations:
+    http://creativecommons.org/licenses/by-nc-sa/3.0/
+
+    
+
+Changelog:
+    Version: 0.2 - 1.9:
+        * Code improvemnts
+        * FIX: Bugs
+        * ADD: Features ... (coloring, etc.)
+
+    Version: 0.1:
+        * init Version.
+        
