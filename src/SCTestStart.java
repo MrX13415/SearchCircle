@@ -1,3 +1,6 @@
+import javax.swing.JFrame;
+import javax.swing.SearchCircle;
+
 
 public class SCTestStart {
 
@@ -6,7 +9,6 @@ public class SCTestStart {
 	
 		SCTest png = new SCTest();
 		png.GUI();
-		
 	}
 
 

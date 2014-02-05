@@ -1,15 +1,12 @@
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Dictionary;
 
-import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
@@ -20,8 +17,9 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SearchCircle;
-import javax.swing.SearchCircle.POS;
+import javax.swing.SearchCircle.Anchor;
 import javax.swing.SearchCircle.STYLE;
+import javax.swing.colorchooser.ColorSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -188,8 +186,8 @@ public class Gui implements ActionListener, KeyListener, ChangeListener{
 		anchor = new JComboBox();
 		anchor.addActionListener(this);
 		
-		POS posvalue = searchCircle.getAnchor();
-		for (SearchCircle.POS currentPos : SearchCircle.POS.values()) {
+		Anchor posvalue = searchCircle.getAnchor();
+		for (SearchCircle.Anchor currentPos : SearchCircle.Anchor.values()) {
 			anchor.addItem(currentPos.toString());
 		}
 		style.setSelectedItem(posvalue.toString());
@@ -281,7 +279,7 @@ public class Gui implements ActionListener, KeyListener, ChangeListener{
 			}
 			
 			if (source.equals(style)) searchCircle.setStyle(STYLE.valueOf(style.getSelectedItem().toString()));		
-			if (source.equals(anchor)) searchCircle.setAnchor(POS.valueOf(anchor.getSelectedItem().toString()));		
+			if (source.equals(anchor)) searchCircle.setAnchor(Anchor.valueOf(anchor.getSelectedItem().toString()));		
 
 			if (source.equals(buttonColor)) changeColor(buttonColor, new SearchCircle.ImageModifier(searchCircle.getButtonImage()).getAverageColor());
 			if (source.equals(barColor)) changeColor(barColor, new SearchCircle.ImageModifier(searchCircle.getBarImage()).getAverageColor());
@@ -333,13 +331,29 @@ public class Gui implements ActionListener, KeyListener, ChangeListener{
 	}
 	
 	
-	public void changeColor(Object source, Color color) {
-		Color newColor = JColorChooser.showDialog(window, "Choose a Color ...", color);
-		if (newColor != null){
-			if (source.equals(buttonColor)) searchCircle.setButtonColor(newColor);
-			if (source.equals(barColor)) searchCircle.setBarColor(newColor);
-			if (source.equals(backgroundColor)) searchCircle.setBackgroundColor(newColor);
-		}
+	public void changeColor(final Object source, Color color) {
+		final JColorChooser newColor = new JColorChooser(color);
+	
+		ColorSelectionModel model = newColor.getSelectionModel();
+	    ChangeListener changeListener = new ChangeListener() {
+	      public void stateChanged(ChangeEvent changeEvent) {
+
+			if (newColor != null){
+				if (source.equals(buttonColor)) searchCircle.setButtonColor(newColor.getColor());
+				if (source.equals(barColor)) searchCircle.setBarColor(newColor.getColor());
+				if (source.equals(backgroundColor)) searchCircle.setBackgroundColor(newColor.getColor());
+			}
+	      }
+	    };
+	    model.addChangeListener(changeListener);
+	    
+	    JFrame frame = new JFrame("JColorChooser Popup");
+	    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+	    frame.add(newColor, BorderLayout.CENTER);
+
+	    frame.pack();
+	    frame.setVisible(true);
 	}
 
 	@Override

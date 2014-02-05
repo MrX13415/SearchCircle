@@ -5,6 +5,7 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -59,19 +60,18 @@ public class SCTest implements ActionListener{
 		searchBar.setStartAngle(-30);
 		searchBar.setViewAngle(360);
 		searchBar.setStyle(SearchCircle.STYLE.PARTS);		
-		searchBar.setAnchor(SearchCircle.POS.CENTER);
+		searchBar.setAnchor(SearchCircle.Anchor.CENTER);
 		searchBar.addActionListener(this);
-		
-		
-		BufferedImage img = new BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = (Graphics2D) img.getGraphics();
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); //enable Antialiasing ...
-		
-		
-		for (int i = 0; i <= 20; i++) {
-			g.setColor(Color.getHSBColor(1.0f, 1.0f, ((float)i / 20f)));
-			g.drawLine(i, 0, i, 20);
-		}
+
+//		BufferedImage img = new BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB);
+//		Graphics2D g = (Graphics2D) img.getGraphics();
+//		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); //enable Antialiasing ...
+//		
+//		
+//		for (int i = 0; i <= 20; i++) {
+//			g.setColor(Color.getHSBColor(1.0f, 1.0f, ((float)i / 20f)));
+//			g.drawLine(i, 0, i, 20);
+//		}
 		
 //		searchBar.setButtondImage(img);
 		
@@ -91,35 +91,39 @@ public class SCTest implements ActionListener{
 //		im.setHue(SearchCircle.ImageModifier.getHSBfromColor(Color.BLUE).getHue());
 //		searchBar.setBarBackgroundImage(im.modify());
 
-		searchBar.setBarThickness(20);
+		searchBar.setBarThickness(15);
 //		searchBar.setButtonSize(new Dimension(30, 30));
 	
 		//---------------------------------------------------------------------------------
 		
-		
-		index = (int) searchBar.getMinimum();
-		
-		while (window != null) {
+		new Thread(new Runnable() {
 			
-			if (automove){
-				searchBar.setBarValue(index);
-				if (! searchBar.isMouseChangingButtonValue()) searchBar.setButtonValue(index);
-	
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			@Override
+			public void run() {
+				index = (int) searchBar.getMinimum();
+
+				while (window != null) {
+					
+					if (automove){
+						searchBar.setBarValue(index);
+						
+						if (! searchBar.isMouseChangingButtonValue()) searchBar.setButtonValue(index);
+			
+						try {
+							Thread.sleep(10);
+						} catch (InterruptedException e) {}
+//						System.out.println(index);
+						index += 1;
+						
+						if (index > searchBar.getMaximum()) {
+							index = (int) searchBar.getMinimum();
+						}
+					}
 				}
 				
-				index += 1;
-				
-	
-				if (index > searchBar.getMaximum()) {
-					index = (int) searchBar.getMinimum();
-				}
 			}
-		}
+		}).start();
+	
 	}
 	
 
