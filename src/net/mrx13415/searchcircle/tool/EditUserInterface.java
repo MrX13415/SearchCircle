@@ -1,9 +1,13 @@
+package net.mrx13415.searchcircle.tool;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -16,17 +20,21 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
-import javax.swing.SearchCircle;
-import javax.swing.SearchCircle.Anchor;
-import javax.swing.SearchCircle.STYLE;
-import javax.swing.colorchooser.ColorSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import net.mrx13415.searchcircle.imageutil.ImageModifier;
+import net.mrx13415.searchcircle.imageutil.color.HSB;
+import net.mrx13415.searchcircle.swing.JSearchCircle;
+import net.mrx13415.searchcircle.swing.JSearchCircle.Anchor;
+import net.mrx13415.searchcircle.swing.JSearchCircle.STYLE;
 
 
-public class Gui implements ActionListener, KeyListener, ChangeListener{
+public class EditUserInterface implements ActionListener, KeyListener, ChangeListener{
 	
-	SearchCircle searchCircle = null;
+	JSearchCircle searchCircle = null;
 	
 	JCheckBox rotateButton;
 	JCheckBox barRotated180;
@@ -62,9 +70,9 @@ public class Gui implements ActionListener, KeyListener, ChangeListener{
 	Object directionitem1 = "Left";
 	Object directionitem2 = "Right";
 	
-	JComboBox direction;
-	JComboBox style;		
-	JComboBox anchor;
+	JComboBox<Object> direction;
+	JComboBox<String> style;		
+	JComboBox<String> anchor;
 
 	JButton buttonColor;
 	JButton barColor;
@@ -77,7 +85,7 @@ public class Gui implements ActionListener, KeyListener, ChangeListener{
 	JFrame parent;
 	JColorChooser cc;
 	
-	public Gui(SearchCircle searchCircle, JFrame parent) {
+	public EditUserInterface(JSearchCircle searchCircle, JFrame parent) {
 		this.searchCircle = searchCircle;
 		this.parent = parent;
 		
@@ -169,25 +177,25 @@ public class Gui implements ActionListener, KeyListener, ChangeListener{
 		stylelabel = new JLabel("Bar style: ");
 		anchorlabel = new JLabel("Button anchor: ");
 
-		direction = new JComboBox();
+		direction = new JComboBox<Object>();
 		direction.addActionListener(this);
 		direction.addItem(directionitem1);
 		direction.addItem(directionitem2);		
-		if (searchCircle.getDirection() == SearchCircle.BAR_DIRECTION_RIGHT) direction.setSelectedItem(directionitem2);
+		if (searchCircle.getDirection() == JSearchCircle.BAR_DIRECTION_RIGHT) direction.setSelectedItem(directionitem2);
 		
-		style = new JComboBox();
+		style = new JComboBox<String>();
 		style.addActionListener(this);
 		STYLE stylevalue = searchCircle.getStyle();
-		for (SearchCircle.STYLE currentStyle : SearchCircle.STYLE.values()) {
+		for (JSearchCircle.STYLE currentStyle : JSearchCircle.STYLE.values()) {
 			style.addItem(currentStyle.toString());
 		}
 		style.setSelectedItem(stylevalue.toString());
 		
-		anchor = new JComboBox();
+		anchor = new JComboBox<String>();
 		anchor.addActionListener(this);
 		
 		Anchor posvalue = searchCircle.getAnchor();
-		for (SearchCircle.Anchor currentPos : SearchCircle.Anchor.values()) {
+		for (JSearchCircle.Anchor currentPos : JSearchCircle.Anchor.values()) {
 			anchor.addItem(currentPos.toString());
 		}
 		style.setSelectedItem(posvalue.toString());
@@ -254,8 +262,6 @@ public class Gui implements ActionListener, KeyListener, ChangeListener{
 		window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		window.pack();
 		window.setVisible(true);
-		
-		
 	}
 
 	@Override
@@ -274,17 +280,17 @@ public class Gui implements ActionListener, KeyListener, ChangeListener{
 			if (source.equals(buttonVisible)) searchCircle.setButtonVisible(buttonVisible.isSelected());
 			
 			if (source.equals(direction)){
-				if (direction.getSelectedItem().equals(directionitem1)) searchCircle.setDirection(SearchCircle.BAR_DIRECTION_LEFT);
-				if (direction.getSelectedItem().equals(directionitem2)) searchCircle.setDirection(SearchCircle.BAR_DIRECTION_RIGHT);			
+				if (direction.getSelectedItem().equals(directionitem1)) searchCircle.setDirection(JSearchCircle.BAR_DIRECTION_LEFT);
+				if (direction.getSelectedItem().equals(directionitem2)) searchCircle.setDirection(JSearchCircle.BAR_DIRECTION_RIGHT);			
 			}
 			
 			if (source.equals(style)) searchCircle.setStyle(STYLE.valueOf(style.getSelectedItem().toString()));		
 			if (source.equals(anchor)) searchCircle.setAnchor(Anchor.valueOf(anchor.getSelectedItem().toString()));		
 
-			if (source.equals(buttonColor)) changeColor(buttonColor, new SearchCircle.ImageModifier(searchCircle.getButtonImage()).getAverageColor());
-			if (source.equals(barColor)) changeColor(barColor, new SearchCircle.ImageModifier(searchCircle.getBarImage()).getAverageColor());
-			if (source.equals(backgroundColor)) changeColor(backgroundColor, new SearchCircle.ImageModifier(searchCircle.getBarBackgroundImage()).getAverageColor());
-			if (source.equals(move)) SCTest.automove = !SCTest.automove;
+			if (source.equals(buttonColor)) changeColor(buttonColor, new ImageModifier(searchCircle.getButtonImage()).getAverageColor());
+			if (source.equals(barColor)) changeColor(barColor, new ImageModifier(searchCircle.getBarImage()).getAverageColor());
+			if (source.equals(backgroundColor)) changeColor(backgroundColor, new ImageModifier(searchCircle.getBarBackgroundImage()).getAverageColor());
+			if (source.equals(move)) UserInterface.automove = !UserInterface.automove;
 			
 		
 		} catch (Exception e2) {
@@ -332,25 +338,207 @@ public class Gui implements ActionListener, KeyListener, ChangeListener{
 	
 	
 	public void changeColor(final Object source, Color color) {
-		final JColorChooser newColor = new JColorChooser(color);
-	
-		ColorSelectionModel model = newColor.getSelectionModel();
-	    ChangeListener changeListener = new ChangeListener() {
-	      public void stateChanged(ChangeEvent changeEvent) {
 
-			if (newColor != null){
-				if (source.equals(buttonColor)) searchCircle.setButtonColor(newColor.getColor());
-				if (source.equals(barColor)) searchCircle.setBarColor(newColor.getColor());
-				if (source.equals(backgroundColor)) searchCircle.setBackgroundColor(newColor.getColor());
+		final JTextField ht = new JTextField("   0.00000");
+		final JTextField st = new JTextField("   0.00000");
+		final JTextField bt = new JTextField("   0.00000");
+		
+		final JSlider h = new JSlider(-100000, 100000, 0);
+		final JSlider s = new JSlider(-100000, 100000, 0);
+		final JSlider b = new JSlider(-100000, 100000, 0);
+
+		ht.addFocusListener(new FocusAdapter() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				ht.selectAll();
 			}
-	      }
-	    };
-	    model.addChangeListener(changeListener);
-	    
-	    JFrame frame = new JFrame("JColorChooser Popup");
-	    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		});
+		
+		st.addFocusListener(new FocusAdapter() {
 
-	    frame.add(newColor, BorderLayout.CENTER);
+			@Override
+			public void focusGained(FocusEvent e) {
+				st.selectAll();
+			}
+		});
+		
+		bt.addFocusListener(new FocusAdapter() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				bt.selectAll();
+			}
+		});
+		
+		ht.getDocument().addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				changedUpdate(e);
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				changedUpdate(e);
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				try {
+					float vh = Float.valueOf(ht.getText());
+					float vs = Float.valueOf(st.getText());
+					float vb = Float.valueOf(bt.getText());
+					
+					if (vh > 1 || vh < -1) return;
+					if (vs > 1 || vs < -1) return;
+					if (vb > 1 || vb < -1) return;
+					
+					h.setValue((int) (vh * 100000));
+					s.setValue((int) (vs * 100000));
+					b.setValue((int) (vb * 100000));
+					
+					if (source.equals(buttonColor)) searchCircle.setButtonHSB(new HSB(vh, vs, vb));
+					if (source.equals(barColor)) searchCircle.setBarHSB(new HSB(vh, vs, vb));
+					if (source.equals(backgroundColor)) searchCircle.setBackgroundHSB(new HSB(vh, vs, vb));
+				} catch (Exception e2) {}
+			}
+		});
+		
+		st.getDocument().addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				changedUpdate(e);
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				changedUpdate(e);
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				try {
+					float vh = Float.valueOf(ht.getText());
+					float vs = Float.valueOf(st.getText());
+					float vb = Float.valueOf(bt.getText());
+					
+					if (vh > 1 || vh < -1) return;
+					if (vs > 1 || vs < -1) return;
+					if (vb > 1 || vb < -1) return;
+					
+					h.setValue((int) (vh * 100000));
+					s.setValue((int) (vs * 100000));
+					b.setValue((int) (vb * 100000));
+					
+					if (source.equals(buttonColor)) searchCircle.setButtonHSB(new HSB(vh, vs, vb));
+					if (source.equals(barColor)) searchCircle.setBarHSB(new HSB(vh, vs, vb));
+					if (source.equals(backgroundColor)) searchCircle.setBackgroundHSB(new HSB(vh, vs, vb));
+				} catch (Exception e2) {}
+			}
+		});
+
+		bt.getDocument().addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				changedUpdate(e);
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				changedUpdate(e);
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				try {
+					float vh = Float.valueOf(ht.getText());
+					float vs = Float.valueOf(st.getText());
+					float vb = Float.valueOf(bt.getText());
+					
+					if (vh > 1 || vh < -1) return;
+					if (vs > 1 || vs < -1) return;
+					if (vb > 1 || vb < -1) return;
+					
+					h.setValue((int) (vh * 100000));
+					s.setValue((int) (vs * 100000));
+					b.setValue((int) (vb * 100000));
+					
+					if (source.equals(buttonColor)) searchCircle.setButtonHSB(new HSB(vh, vs, vb));
+					if (source.equals(barColor)) searchCircle.setBarHSB(new HSB(vh, vs, vb));
+					if (source.equals(backgroundColor)) searchCircle.setBackgroundHSB(new HSB(vh, vs, vb));
+				} catch (Exception e2) {}
+			}
+		});
+
+		h.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				float v = ((JSlider)e.getSource()).getValue() / 100000f;
+				ht.setText(String.valueOf(v));
+			}
+		});
+		
+	
+		s.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				float v = ((JSlider)e.getSource()).getValue() / 100000f;
+				st.setText(String.valueOf(v));
+			}
+		});
+		
+		
+		b.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				float v = ((JSlider)e.getSource()).getValue() / 100000f;
+				bt.setText(String.valueOf(v));
+			}
+		});
+		
+		JLabel t1 = new JLabel("hue: ");
+		t1.setPreferredSize(new Dimension(70, 25));
+		
+		JLabel t2 = new JLabel("saturation: ");
+		t2.setPreferredSize(new Dimension(70, 25));
+		
+		JLabel t3 = new JLabel("brightness: ");
+		t3.setPreferredSize(new Dimension(70, 25));
+		
+		JPanel hp = new JPanel(new BorderLayout());
+		hp.add(t1, BorderLayout.WEST);
+		hp.add(h);
+		hp.add(ht, BorderLayout.EAST);
+				
+		JPanel sp = new JPanel(new BorderLayout());
+		sp.add(t2, BorderLayout.WEST);
+		sp.add(s);
+		sp.add(st, BorderLayout.EAST);
+				
+		JPanel bp = new JPanel(new BorderLayout());
+		bp.add(t3, BorderLayout.WEST);
+		bp.add(b);
+		bp.add(bt, BorderLayout.EAST);
+
+	    JFrame frame = new JFrame();
+	    
+	    frame.setTitle("Change " + (source.equals(buttonColor) ? "button" : 
+	    	source.equals(barColor) ? "bar" :
+	    		source.equals(backgroundColor) ? "background" : "") + " color");
+	    
+	    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+	    frame.setLocationRelativeTo(null);
+	    
+	    frame.getContentPane().setLayout(new GridLayout(3, 1));
+	    frame.getContentPane().add(hp);
+	    frame.getContentPane().add(sp);
+	    frame.getContentPane().add(bp);
 
 	    frame.pack();
 	    frame.setVisible(true);

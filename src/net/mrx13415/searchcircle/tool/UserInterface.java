@@ -1,23 +1,21 @@
+package net.mrx13415.searchcircle.tool;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SearchCircle;
+
+import net.mrx13415.searchcircle.swing.JSearchCircle;
 
 
-public class SCTest implements ActionListener{
+public class UserInterface implements ActionListener{
 
 	JFrame window = null;
 	JPanel panel;
 	JButton button;
-	SearchCircle searchBar;
+	JSearchCircle searchBar;
 	
 	static boolean automove = true;
 	
@@ -26,7 +24,7 @@ public class SCTest implements ActionListener{
 	
 	public void GUI(){
 		
-		searchBar = new SearchCircle();
+		searchBar = new JSearchCircle();
 		searchBar.setOpaque(false);
 
 		button = new JButton();
@@ -41,7 +39,8 @@ public class SCTest implements ActionListener{
 		
 		//--------------------
 		
-		window = new JFrame("SearchCircle 1.9 (alpha) - Test App");
+		window = new JFrame("SearchCircle 1.9.9 (alpha) - Test App");
+		window.setLocationRelativeTo(null);
 		window.getContentPane().add(panel);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.pack();
@@ -54,13 +53,13 @@ public class SCTest implements ActionListener{
 		searchBar.setButtonJutOut(2);
 		searchBar.setMinimum(0);
 		searchBar.setMaximum(500);
-		searchBar.setDirection(SearchCircle.BAR_DIRECTION_LEFT);
+		searchBar.setDirection(JSearchCircle.BAR_DIRECTION_LEFT);
 		searchBar.setButtonVisible(true);
 		searchBar.setButtonValue(50);
 		searchBar.setStartAngle(-30);
 		searchBar.setViewAngle(360);
-		searchBar.setStyle(SearchCircle.STYLE.PARTS);		
-		searchBar.setAnchor(SearchCircle.Anchor.CENTER);
+		searchBar.setStyle(JSearchCircle.STYLE.PARTS);		
+		searchBar.setAnchor(JSearchCircle.Anchor.CENTER);
 		searchBar.addActionListener(this);
 
 //		BufferedImage img = new BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB);
@@ -134,7 +133,7 @@ public class SCTest implements ActionListener{
 		}
 		
 		if (e.getSource().equals(button)) {
-			new Gui(searchBar, window);
+			new EditUserInterface(searchBar, window);
 		}
 	}
 	
