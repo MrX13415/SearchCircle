@@ -25,7 +25,7 @@ import net.mrx13415.searchcircle.math.Vector2d;
  * SearchCircle Daus/Bellmann (c) 2013
  * 
  * @author Oliver Daus / Jens Bellmann
- * @version 1.9.9
+ * @version 1.10.1
  * 
  *          Description: A round search and progress bar
  * 
@@ -37,6 +37,9 @@ import net.mrx13415.searchcircle.math.Vector2d;
  *             For more Informations:
  *             http://creativecommons.org/licenses/by-nc-sa/3.0/
  *
+ *			Version: 1.10.1
+ * 			 - FIX: Added components are wrongly drawn
+ * 
  * 			Version: 1.10.0
  * 			 - FIX: Changed internal package structure
  * 			 - FIX: performance improved 
@@ -517,16 +520,16 @@ public class JSearchCircle extends JButton implements MouseListener,
 	
 	private void drawButton(Graphics2D g){
 
-		// draws the Button to the specified value
-		g.rotate(Math.toRadians(getAngle(buttonValue) * barDirection),
-				searchCirclePivotX, searchCirclePivotY); // rotate
+		double curA = getAngle(buttonValue) * barDirection;
 
-		if (rotateButton) {
-			int ix = (searchCirclePivotX - buttonWidth / 2) + buttonWidth / 2;
-			int iy = (barBoundsY - buttonJutOut) + buttonHeight / 2;
-			g.rotate(Math.toRadians((getAngle(buttonValue) * barDirection)) * -1, ix,
-					iy);
-		}
+		int ix = (searchCirclePivotX - buttonWidth / 2) + buttonWidth / 2;
+		int iy = (barBoundsY - buttonJutOut) + buttonHeight / 2;
+		
+		// draws the Button on the specified value
+		g.rotate(Math.toRadians(curA), searchCirclePivotX, searchCirclePivotY); // rotate
+
+		if (rotateButton)
+			g.rotate(Math.toRadians(curA) * -1, ix, iy);
 
 		if (this.hasFocus()){
 			g.drawImage(imgButtonSelected, searchCirclePivotX - buttonWidth / 2, barBoundsY
@@ -535,6 +538,10 @@ public class JSearchCircle extends JButton implements MouseListener,
 			g.drawImage(imgButton, searchCirclePivotX - buttonWidth / 2, barBoundsY
 					- buttonJutOut, buttonWidth, buttonHeight, this); // draw
 		}
+
+		//reset rotation ...
+		g.rotate(Math.toRadians(curA),  ix, iy); // rotate
+		g.rotate(Math.toRadians(curA * -1), searchCirclePivotX, searchCirclePivotY); // rotate
 	}
 
 	/**
