@@ -557,6 +557,7 @@ public class JSearchCircle extends JButton implements MouseListener,
 		//set fency graphics ...
 		g.setRenderingHints(getRenderingHints());
 
+		
 		drawBackground(g);
 		drawBar(g);
 		drawButton(g);
@@ -598,7 +599,7 @@ public class JSearchCircle extends JButton implements MouseListener,
 		
 		hints.put(RenderingHints.KEY_RENDERING,
 				RenderingHints.VALUE_RENDER_QUALITY); // set render to HQ ...
-
+		
 		return hints;
 	}
 
@@ -923,7 +924,7 @@ public class JSearchCircle extends JButton implements MouseListener,
 	public void setBarImage(Image img) {
 		imgBar = img;
 		imgOrgBar = imgBar;
-		imgBarRotated = rotateImage180(img);
+		imgBarRotated = rotateImage180(imgBar);
 		recalcThickness();
 		recalcImageDesing();
 	}
@@ -1178,7 +1179,7 @@ public class JSearchCircle extends JButton implements MouseListener,
 		im.setBrightness(hsb.getBrightness());
 
 		imgBar = im.modify();
-		imgBar = rotateImage180(imgBar);
+		imgBarRotated = rotateImage180(imgBar);
 		
 		setBarThickness(thickness);
 		

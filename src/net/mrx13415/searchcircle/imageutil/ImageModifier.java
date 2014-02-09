@@ -128,7 +128,7 @@ public class ImageModifier {
 		averageColor = new Color(red, green, blue);
 	}
 
-	private float getMinMax(float value) {
+	public static float getMinMax(float value) {
 		if (value > HSB_MAX_VALUE) {
 			value = HSB_MAX_VALUE;
 		}
@@ -146,9 +146,8 @@ public class ImageModifier {
 	 *            color
 	 * @return A instance of SearchCircle.ImageModifier.HSB
 	 */
-	public static HSB getHSBfromColor(Color color) {
-		return new HSB((Color.RGBtoHSB(color.getRed(), color.getGreen(),
-				color.getBlue(), null)));
+	public static HSB getHsSBfromColor(Color color) {
+		return new HSB(color);
 	}
 
 	/**

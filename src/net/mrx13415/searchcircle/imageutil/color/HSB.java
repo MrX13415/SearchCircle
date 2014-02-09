@@ -1,5 +1,7 @@
 package net.mrx13415.searchcircle.imageutil.color;
 
+import java.awt.Color;
+
 public class HSB {
 
 	private float hue = 0x00;
@@ -7,6 +9,10 @@ public class HSB {
 	private float brightness = 0x00;
 
 	public HSB() {
+	}
+	
+	public HSB(Color color) {
+		this(getHSBfromColor(color));		
 	}
 	
 	public HSB(HSB hsb) {
@@ -21,6 +27,22 @@ public class HSB {
 
 	public HSB(float[] hsbValues) {
 		setHSB(hsbValues);
+	}
+	
+	/**
+	 * returns the HSB value from the given Color
+	 * 
+	 * @param The
+	 *            color
+	 * @return A instance of SearchCircle.ImageModifier.HSB
+	 */
+	public static HSB getHSBfromColor(Color color) {
+		return new HSB((Color.RGBtoHSB(color.getRed(), color.getGreen(),
+				color.getBlue(), null)));
+	}
+	
+	public Color getColor() {
+		return new Color(Color.HSBtoRGB(hue, saturation, brightness));
 	}
 
 	public float[] getHSB() {
