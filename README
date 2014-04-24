@@ -3,7 +3,7 @@
 =================
     
 Title:        SearchCircle (Demo-Application)
-Version:      1.9 (alpha)
+Version:      1.11 (beta)
 
 Description:  The Demo application for the "SearchCircle" GUI-Component (Swing)
               The actual SearchCircle is located under the package "javax.swing.searchcircle"
@@ -22,7 +22,7 @@ License:
     
 
 Changelog:
-    Version: 0.2 - 1.9:
+    Version: 0.2 - 1.11:
         * Code improvemnts
         * FIX: Bugs
         * ADD: Features ... (coloring, etc.)
