@@ -6,10 +6,10 @@ Title:        SearchCircle (Demo-Application)
 Version:      1.11 (beta)
 
 Description:  The Demo application for the "SearchCircle" GUI-Component (Swing)
-              The actual SearchCircle is located under the package "javax.swing.searchcircle"
+              
 website:      --
 
-Copyright (C) 2011 Daus / Bellmann
+Copyright (C) 2014 Daus / Bellmann
 
 
 License:
