@@ -86,7 +86,6 @@ public class HSB {
 	}
 
 	public String toString() {
-		return "[h=" + (hue * 360f) + ";s=" + (saturation * 100f)
-				+ ";b=" + (brightness * 100f) + "]";
+		return this.getClass().getName() + "[h=" + hue + ";s=" + saturation	+ ";b=" + brightness + "]";
 	}
 }

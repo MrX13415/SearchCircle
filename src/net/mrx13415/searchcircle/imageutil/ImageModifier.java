@@ -146,7 +146,7 @@ public class ImageModifier {
 	 *            color
 	 * @return A instance of SearchCircle.ImageModifier.HSB
 	 */
-	public static HSB getHsSBfromColor(Color color) {
+	public static HSB getHSBfromColor(Color color) {
 		return new HSB(color);
 	}
 

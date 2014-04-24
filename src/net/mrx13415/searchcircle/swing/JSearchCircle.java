@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.SearchCircle;
 
 import net.mrx13415.searchcircle.event.SearchCircleChangeEvent;
 import net.mrx13415.searchcircle.event.SearchCircleKeyEvent;
@@ -25,7 +26,7 @@ import net.mrx13415.searchcircle.math.Vector2d;
  * SearchCircle Daus/Bellmann (c) 2013
  * 
  * @author Oliver Daus / Jens Bellmann
- * @version 1.10.1
+ * @version 1.11
  * 
  *          Description: A round search and progress bar
  * 
@@ -37,6 +38,10 @@ import net.mrx13415.searchcircle.math.Vector2d;
  *             For more Informations:
  *             http://creativecommons.org/licenses/by-nc-sa/3.0/
  *
+ *			Version: 1.11
+ * 			 - FIX: KeyEvent works again
+ *           - ADD: Improved KeyEvent with a repetition delay and repetition rate option 
+ * 
  *			Version: 1.10.1
  * 			 - FIX: Added components are wrongly drawn
  * 
@@ -89,7 +94,7 @@ public class JSearchCircle extends JButton implements MouseListener,
 	private static final double buttonPosAngleCorrectionTolerance = 0.1;
 	private static final double barPartSpaceAngleFixVaule = 200;
 
-	public boolean debug = false;
+	public boolean DEBUG = false;
 
 	public static enum Anchor {
 		CENTER, LEFT, RIGHT;
@@ -121,8 +126,11 @@ public class JSearchCircle extends JButton implements MouseListener,
 	private double barValue = 0; // in %
 	private double buttonValue = 0;
 	private boolean mouseEvent = false; // true if a mouse button is pressed
-	private boolean keyEvent = false; // true if a key is pressed
-	private double keyScrollamount = -1; // -1 == auto
+	private boolean keyEvent = false; // true if a key is pressed	
+	private double keyScrollAmount = -1; // -1 == auto
+	private long keyRepetitionRate = 220; //in Hz
+	private long keyRepetitionDelay = 200; //in milliseconds
+	private long keyEventOccurTime;
 	// pivot
 	private int searchCirclePivotX;
 	private int searchCirclePivotY;
@@ -207,8 +215,13 @@ public class JSearchCircle extends JButton implements MouseListener,
 		
 		imgBarBackground = new ImageIcon(getClass().getResource(resPackage + "/barbackground.png")).getImage();
 		imgButton = new ImageIcon(getClass().getResource(resPackage + "/button.png")).getImage();
-		imgButtonSelected = new ImageIcon(getClass().getResource(resPackage + "/buttonSelected.png")).getImage();
+//		imgButtonSelected = new ImageIcon(getClass().getResource(resPackage + "/buttonSelected.png")).getImage();
 
+		//make it a little darker ...
+		ImageModifier im = new ImageModifier(imgButton);
+		im.setBrightness(-0.2f);
+		imgButtonSelected = im.modify();
+				
 		// create Backups
 		imgOrgBar = imgBar;
 		imgOrgBarBackground = imgBarBackground;
@@ -562,7 +575,7 @@ public class JSearchCircle extends JButton implements MouseListener,
 		drawBar(g);
 		drawButton(g);
 		
-		if (debug) {
+		if (DEBUG) {
 			// set start angle
 			g.setColor(Color.ORANGE);
 			g.drawLine(0, 0, (int) povit.getX(), (int) povit.getY());
@@ -797,41 +810,55 @@ public class JSearchCircle extends JButton implements MouseListener,
 		repaintImages((Graphics2D) g);
 	}
 
-	private void processSCKeyEvent(final KeyEvent e) {
-
-		keyEvent = true;
+	private void processSCKeyEvent(final KeyEvent event) {
+		
+		final JSearchCircle instance = this;		
 
 		Thread ke = new Thread(new Runnable() {
 			@Override
-			public void run() {
+			public void run() {	
+				
+				boolean once = false;
+				
 				while (keyEvent) {
 
+					try {
+						Thread.sleep(1000 / keyRepetitionRate);
+					} catch (InterruptedException e) {}
+					
+					//cancel this if the key isn't pressed anymore ...
+					if (!keyEvent)
+						break;
+										
+					long now = System.currentTimeMillis();
+					long deltatT = now - keyEventOccurTime;
+
+					if (deltatT < keyRepetitionDelay)
+						if (once) continue;
+
+					once = true;
+	
 					double amount = ((maximum - minimum) / viewAngle) / 3;
 					if (amount <= 0)
 						amount = 1;
 
-					if (keyScrollamount >= 0)
-						amount = keyScrollamount;
+					if (keyScrollAmount >= 0)
+						amount = keyScrollAmount;
 
-					if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+					if (event.getKeyCode() == KeyEvent.VK_RIGHT) {
 						setButtonValue(getButtonValue() + amount);
 
-					} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+					} else if (event.getKeyCode() == KeyEvent.VK_LEFT) {
 						setButtonValue(getButtonValue() - amount);
 					}
 
-					for (int i = 0; i < 250; i++) {
-						if (!keyEvent)
-							break;
-						
-//						try {
-//							Thread.sleep(5);
-//						} catch (InterruptedException e) {
-//						}
+					for (SearchCircleListener scl : SearchCircleListener) {
+						scl.onKeyHold(new SearchCircleKeyEvent(instance, event));
 					}
 				}
 			}
 		});
+		
 		ke.setName("SearchCircle(" + this.getName() + ")@" + this.hashCode()
 				+ "#KeyEventThread");
 		ke.start();
@@ -839,20 +866,19 @@ public class JSearchCircle extends JButton implements MouseListener,
 
 	@Override
 	public void keyPressed(KeyEvent event) {
-		if (this.isEnabled()) {
+		if (!this.isEnabled()) return;
+		
+		//Cancel this if there is a key-event already running ...
+		if (keyEvent) return;
 
-			if (!keyEvent) {
-				for (SearchCircleListener scl : SearchCircleListener) {
-					scl.onKeyPressed(new SearchCircleKeyEvent(this, event));
-				}
-			}
+		keyEventOccurTime = System.currentTimeMillis();
+		keyEvent = true;
 
-			processSCKeyEvent(event);
-
-			for (SearchCircleListener scl : SearchCircleListener) {
-				scl.onKeyHold(new SearchCircleKeyEvent(this, event));
-			}
+		for (SearchCircleListener scl : SearchCircleListener) {
+			scl.onKeyPressed(new SearchCircleKeyEvent(this, event));
 		}
+			
+		processSCKeyEvent(event);
 	}
 
 	@Override
@@ -909,11 +935,11 @@ public class JSearchCircle extends JButton implements MouseListener,
 	}
 
 	public boolean isDebug() {
-		return debug;
+		return DEBUG;
 	}
 
 	public void setDebug(boolean debug) {
-		this.debug = debug;
+		this.DEBUG = debug;
 	}
 
 	/**
@@ -1002,12 +1028,32 @@ public class JSearchCircle extends JButton implements MouseListener,
 		return new Dimension(buttonWidth, buttonHeight);
 	}
 
-	public void setKeyScrollamount(double keyScrollamount) {
-		this.keyScrollamount = keyScrollamount;
+	public double getKeyScrollAmount() {
+		return keyScrollAmount;
 	}
 
-	public double getKeyScrollamount() {
-		return keyScrollamount;
+	public void setKeyScrollAmount(double keyScrollAmount) {
+		this.keyScrollAmount = keyScrollAmount;
+	}
+
+	public long getKeyRepetitionRate() {
+		return keyRepetitionRate;
+	}
+
+	public void setKeyRepetitionRate(long keyRepetitionRate) {
+		this.keyRepetitionRate = keyRepetitionRate;
+	}
+
+	public long getKeyRepetitionDelay() {
+		return keyRepetitionDelay;
+	}
+
+	public void setKeyRepetitionDelay(long keyRepetitionDelay) {
+		this.keyRepetitionDelay = keyRepetitionDelay;
+	}
+
+	public long getKeyEventOccurTime() {
+		return keyEventOccurTime;
 	}
 
 	public void setRotateButton(boolean rotate) {
@@ -1163,6 +1209,11 @@ public class JSearchCircle extends JButton implements MouseListener,
 		im.setBrightness(hsb.getBrightness());
 
 		imgButton = im.modify();
+		
+		//TODO: may change this later ...
+		ImageModifier im2 = new ImageModifier(imgButton);
+		im2.setBrightness(-0.2f);
+		imgButtonSelected = im2.modify();
 		
 		setBarThickness(thickness);
 		
